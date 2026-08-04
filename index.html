@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serwis Kotłów - BBQ Kees</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        header h1 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .ip-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button:active {
+            background: #3d8b40;
+        }
+
+        button.secondary {
+            background: #2196F3;
+        }
+
+        button.secondary:hover {
+            background: #0b7dda;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .status-item {
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff9800;
+        }
+
+        .status-dot.connected {
+            background: #4CAF50;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .card {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .card h3 {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .card .value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card .unit {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .card.status-ok {
+            border-left-color: #4CAF50;
+        }
+
+        .card.status-warn {
+            border-left-color: #ff9800;
+        }
+
+        .card.status-error {
+            border-left-color: #f44336;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: transparent;
+            color: #999;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            border-bottom-color: #2196F3;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .section h2 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #2196F3;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+        }
+
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .param-row:last-child {
+            border-bottom: none;
+        }
+
+        .param-name {
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .param-value {
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .param-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .param-controls input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .param-controls button {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        .error {
+            background: #f44336;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .success {
+            background: #4CAF50;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .service-log {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 11px;
+            color: #999;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .service-log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .service-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 600px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Serwis Kotłów - BBQ Kees</h1>
+            <div class="ip-input-group">
+                <input type="text" id="ipInput" placeholder="IP bramki (np. 192.168.4.1)" value="192.168.4.1">
+                <button onclick="connectToGateway()">Połącz</button>
+                <button class="secondary" onclick="toggleOfflineMode()">Offline</button>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Odłączony</span>
+                </div>
+                <div class="status-item" id="ipDisplay">IP: -</div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div id="errorMsg"></div>
+            <div id="successMsg"></div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="tab-btn" onclick="switchTab('parameters')">⚙️ Parametry</button>
+                <button class="tab-btn" onclick="switchTab('service')">📋 Serwis</button>
+            </div>
+
+            <!-- DASHBOARD TAB -->
+            <div id="dashboard" class="tab-content active">
+                <div id="loadingDash" class="loading" style="display:none;">
+                    <div class="spinner"></div>
+                    Ładowanie danych...
+                </div>
+                
+                <div id="dashContent">
+                    <div class="section">
+                        <h2>🟢 Diagnoza</h2>
+                        <div class="param-row">
+                            <span class="param-name">Status</span>
+                            <span class="param-value" id="diagStatus">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Kod stanu</span>
+                            <span class="param-value" id="diagCode">-</span>
+                        </div>
+                    </div>
+
+                    <div class="dashboard">
+                        <div class="card status-ok">
+                            <h3>Temperatura zasilania</h3>
+                            <div class="value" id="tempFlow">-</div>
+                            <div class="unit">°C</div>
+                        </div>
+                        <div class="card status-ok">
+                            <h3>Temperatura powrotu</h3>
+                            <div class="value" id="tempReturn">-</div>
+                            <div class="unit">°C</div>
+                        </div>
+                        <div class="card status-ok">
+                            <h3>Ciśnienie</h3>
+                            <div class="value" id="pressure">-</div>
+                            <div class="unit">bar</div>
+                        </div>
+                        <div class="card status-ok">
+                            <h3>Moc kotła</h3>
+                            <div class="value" id="boilerPower">-</div>
+                            <div class="unit">kW</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>📋 Informacje o urządzeniu</h2>
+                        <div class="param-row">
+                            <span class="param-name">Typ kotła</span>
+                            <span class="param-value" id="boilerType">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Wersja sterownika</span>
+                            <span class="param-value" id="firmware">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Moc nominalna</span>
+                            <span class="param-value" id="nominalPower">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARAMETERS TAB -->
+            <div id="parameters" class="tab-content">
+                <div id="loadingParams" class="loading" style="display:none;">
+                    <div class="spinner"></div>
+                    Ładowanie parametrów...
+                </div>
+
+                <div id="paramsContent">
+                    <div class="section">
+                        <h2>🔥 Źródło ciepła (Kocioł)</h2>
+                        <div class="param-row">
+                            <span class="param-name">Temperatura zasilania</span>
+                            <span class="param-value" id="curTempFlow">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Temperatura powrotu</span>
+                            <span class="param-value" id="curTempReturn">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Ciśnienie</span>
+                            <span class="param-value" id="curPressure">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Moc nominalna</span>
+                            <span class="param-value" id="curNomPower">-</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>💧 Obieg grzewczy 1</h2>
+                        <div class="param-row">
+                            <span class="param-name">Temperatura zadana</span>
+                            <div class="param-controls">
+                                <input type="number" id="heatingSetpoint" step="0.5" min="15" max="60">
+                                <button onclick="setParameter('heatingSetpoint')">OK</button>
+                            </div>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Heating curve base</span>
+                            <div class="param-controls">
+                                <input type="number" id="heatingBase" step="1" min="0" max="50">
+                                <button onclick="setParameter('heatingBase')">OK</button>
+                            </div>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Heating curve end</span>
+                            <div class="param-controls">
+                                <input type="number" id="heatingEnd" step="1" min="50" max="100">
+                                <button onclick="setParameter('heatingEnd')">OK</button>
+                            </div>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Status obiegu</span>
+                            <span class="param-value" id="curHeatingStatus">-</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>🚿 Ciepła woda użytkowa</h2>
+                        <div class="param-row">
+                            <span class="param-name">Temperatura zadana</span>
+                            <div class="param-controls">
+                                <input type="number" id="dhwSetpoint" step="0.5" min="30" max="65">
+                                <button onclick="setParameter('dhwSetpoint')">OK</button>
+                            </div>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Temperatura aktualnie</span>
+                            <span class="param-value" id="curDHWTemp">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Komfort</span>
+                            <span class="param-value" id="curDHWComfort">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Status CWU</span>
+                            <span class="param-value" id="curDHWStatus">-</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>⚙️ Zaawansowane</h2>
+                        <div class="param-row">
+                            <span class="param-name">Maksymalna moc</span>
+                            <span class="param-value" id="curMaxPower">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Minimalna moc</span>
+                            <span class="param-value" id="curMinPower">-</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Moc CWU</span>
+                            <span class="param-value" id="curDHWPower">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SERVICE TAB -->
+            <div id="service" class="tab-content">
+                <div class="section">
+                    <h2>📝 Protokół serwisu</h2>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button onclick="addServiceEntry('Serwis wykonany')" style="flex: 1;">✓ Serwis OK</button>
+                        <button class="secondary" onclick="addServiceEntry('Naprawa')" style="flex: 1;">🔧 Naprawa</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button onclick="addServiceEntry('Przegląd')" style="flex: 1;">📋 Przegląd</button>
+                        <button class="secondary" onclick="exportServiceLog()" style="flex: 1;">📤 Eksport</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>📋 Historia</h2>
+                    <div class="service-log" id="serviceLog">
+                        <div style="color: #666; text-align: center; padding: 20px;">Brak wpisów</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>🔄 Akcje serwisowe</h2>
+                    <button onclick="resetErrors()" style="width: 100%; margin-bottom: 10px;">Resetuj błędy</button>
+                    <button onclick="restartBoiler()" style="width: 100%;">Restart kotła</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let appState = {
+            connected: false,
+            gatewayIP: '192.168.4.1',
+            offlineMode: false,
+            serviceLog: [],
+            lastUpdate: null
+        };
+
+        // Załaduj dane z localStorage
+        function loadState() {
+            const saved = localStorage.getItem('appState');
+            if (saved) {
+                appState = { ...appState, ...JSON.parse(saved) };
+                document.getElementById('ipInput').value = appState.gatewayIP;
+                updateServiceLogUI();
+            }
+        }
+
+        // Zapisz dane do localStorage
+        function saveState() {
+            localStorage.setItem('appState', JSON.stringify(appState));
+        }
+
+        function showMessage(text, type = 'error') {
+            const el = type === 'error' ? document.getElementById('errorMsg') : document.getElementById('successMsg');
+            el.textContent = text;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+        }
+
+        async function connectToGateway() {
+            const ip = document.getElementById('ipInput').value;
+            if (!ip) {
+                showMessage('Podaj adres IP bramki');
+                return;
+            }
+
+            appState.gatewayIP = ip;
+            appState.offlineMode = false;
+            saveState();
+
+            document.getElementById('loadingDash').style.display = 'block';
+            document.getElementById('dashContent').style.display = 'none';
+
+            try {
+                const response = await fetch(`http://${ip}/api/boiler`, { timeout: 5000 });
+                if (response.ok) {
+                    appState.connected = true;
+                    document.getElementById('statusDot').className = 'status-dot connected';
+                    document.getElementById('statusText').textContent = 'Połączony';
+                    document.getElementById('ipDisplay').textContent = `IP: ${ip}`;
+                    showMessage('Połączono z bramką!', 'success');
+                    loadDashboardData();
+                } else {
+                    throw new Error('Brak odpowiedzi od bramki');
+                }
+            } catch (err) {
+                appState.connected = false;
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = 'Błąd połączenia';
+                showMessage(`Błąd: ${err.message}`);
+                document.getElementById('loadingDash').style.display = 'none';
+                document.getElementById('dashContent').style.display = 'block';
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const ip = appState.gatewayIP;
+                
+                // Pobierz dane z API BBQ Kees
+                const boilerResponse = await fetch(`http://${ip}/api/boiler`);
+                const boilerData = await boilerResponse.json();
+                
+                const systemResponse = await fetch(`http://${ip}/api/system/info`);
+                const systemData = await systemResponse.json();
+
+                // Ekstrakcja parametrów z odpowiedzi API
+                const tempFlow = boilerData?.data?.temp_flow ?? '-';
+                const tempReturn = boilerData?.data?.temp_return ?? '-';
+                const pressure = boilerData?.data?.pressure ?? '-';
+                const power = boilerData?.data?.power ?? '-';
+                const status = boilerData?.data?.status ?? 'Nieznany';
+
+                document.getElementById('diagStatus').textContent = status;
+                document.getElementById('diagCode').textContent = boilerData?.data?.service_code ?? '-';
+                document.getElementById('tempFlow').textContent = tempFlow;
+                document.getElementById('tempReturn').textContent = tempReturn;
+                document.getElementById('pressure').textContent = pressure;
+                document.getElementById('boilerPower').textContent = power;
+                document.getElementById('boilerType').textContent = systemData?.devices?.[0]?.type ?? '-';
+                document.getElementById('firmware').textContent = systemData?.version ?? '-';
+                document.getElementById('nominalPower').textContent = boilerData?.data?.nominal_power ?? '-';
+
+                document.getElementById('loadingDash').style.display = 'none';
+                document.getElementById('dashContent').style.display = 'block';
+                appState.lastUpdate = new Date();
+                
+                // Auto-refresh co 30 sekund
+                setTimeout(loadDashboardData, 30000);
+            } catch (err) {
+                showMessage(`Błąd ładowania API: ${err.message}`);
+                // Próbuj co 5 sekund jeśli błąd
+                setTimeout(loadDashboardData, 5000);
+            }
+        }
+
+        async function loadParametersData() {
+            try {
+                const ip = appState.gatewayIP;
+                const boilerResponse = await fetch(`http://${ip}/api/boiler`);
+                const boilerData = await boilerResponse.json();
+
+                // Ekstrakcja parametrów
+                const data = boilerData?.data || {};
+                
+                document.getElementById('curTempFlow').textContent = data.temp_flow ?? '-';
+                document.getElementById('curTempReturn').textContent = data.temp_return ?? '-';
+                document.getElementById('curPressure').textContent = data.pressure ?? '-';
+                document.getElementById('curNomPower').textContent = data.nominal_power ?? '-';
+                
+                // Obieg grzewczy
+                document.getElementById('curHeatingStatus').textContent = data.heating_active ? 'Aktywny' : 'Wyłączony';
+                
+                // CWU
+                document.getElementById('curDHWTemp').textContent = data.dhw_temp ?? '-';
+                document.getElementById('curDHWStatus').textContent = data.dhw_active ? 'Aktywna' : 'Wyłączona';
+                document.getElementById('curDHWComfort').textContent = data.dhw_comfort ?? '-';
+                
+                // Zaawansowane
+                document.getElementById('curMaxPower').textContent = data.max_power ?? '-';
+                document.getElementById('curMinPower').textContent = data.min_power ?? '-';
+                document.getElementById('curDHWPower').textContent = data.dhw_power ?? '-';
+
+            } catch (err) {
+                console.log('Błąd ładowania parametrów:', err);
+            }
+        }
+
+        function switchTab(tabName) {
+            // Ukryj wszystkie taby
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Pokaż wybrany tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Jeśli to tab parametrów, załaduj dane
+            if (tabName === 'parameters' && appState.connected) {
+                loadParametersData();
+            }
+        }
+
+        async function setParameter(paramName) {
+            const value = document.getElementById(paramName).value;
+            if (!value && value !== '0') {
+                showMessage('Podaj wartość');
+                return;
+            }
+
+            try {
+                const ip = appState.gatewayIP;
+                
+                // Mapowanie nazw parametrów na API endpoints
+                const paramMap = {
+                    'setpointFlow': { endpoint: '/api/boiler/setpoint', value: parseFloat(value) },
+                    'boilerMode': { endpoint: '/api/boiler/mode', value: value },
+                    'heatingSetpoint': { endpoint: '/api/heating/setpoint', value: parseFloat(value) },
+                    'heatingMode': { endpoint: '/api/heating/mode', value: value },
+                    'dhwSetpoint': { endpoint: '/api/dhw/setpoint', value: parseFloat(value) }
+                };
+
+                if (!paramMap[paramName]) {
+                    showMessage('Nieznany parametr');
+                    return;
+                }
+
+                const param = paramMap[paramName];
+                const response = await fetch(`http://${ip}${param.endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: param.value })
+                });
+
+                if (response.ok) {
+                    showMessage(`Parametr ustawiony na: ${value}`, 'success');
+                    addServiceEntry(`Zmieniono ${paramName} na ${value}`);
+                    // Przeładuj dane po 2 sekundach
+                    setTimeout(loadDashboardData, 2000);
+                } else {
+                    showMessage('Błąd ustawiania parametru');
+                }
+            } catch (err) {
+                showMessage(`Błąd: ${err.message}`);
+            }
+        }
+
+        function addServiceEntry(text) {
+            const entry = {
+                time: new Date().toLocaleTimeString('pl-PL'),
+                date: new Date().toLocaleDateString('pl-PL'),
+                text: text
+            };
+            appState.serviceLog.unshift(entry);
+            if (appState.serviceLog.length > 50) appState.serviceLog.pop();
+            saveState();
+            updateServiceLogUI();
+            showMessage('Wpis dodany do protokołu', 'success');
+        }
+
+        function updateServiceLogUI() {
+            const logEl = document.getElementById('serviceLog');
+            if (appState.serviceLog.length === 0) {
+                logEl.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Brak wpisów</div>';
+                return;
+            }
+            logEl.innerHTML = appState.serviceLog.map(entry => 
+                `<div class="service-log-entry"><strong>${entry.date} ${entry.time}</strong><br>${entry.text}</div>`
+            ).join('');
+        }
+
+        function exportServiceLog() {
+            const text = appState.serviceLog.map(e => `${e.date} ${e.time} - ${e.text}`).join('\n');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `protokol-serwisu-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            showMessage('Protokół wyeksportowany', 'success');
+        }
+
+        async function resetErrors() {
+            try {
+                const ip = appState.gatewayIP;
+                const response = await fetch(`http://${ip}/api/boiler/reset-errors`, { method: 'POST' });
+                
+                if (response.ok) {
+                    showMessage('Błędy zresetowane', 'success');
+                    addServiceEntry('Reset błędów');
+                    setTimeout(loadDashboardData, 1000);
+                } else {
+                    showMessage('Błąd resetowania');
+                }
+            } catch (err) {
+                showMessage(`Błąd: ${err.message}`);
+            }
+        }
+
+        async function restartBoiler() {
+            if (confirm('Czy na pewno restartować kocioł? Grzanie zostanie wznowione.')) {
+                try {
+                    const ip = appState.gatewayIP;
+                    const response = await fetch(`http://${ip}/api/boiler/restart`, { method: 'POST' });
+                    
+                    if (response.ok) {
+                        showMessage('Restart wykonywany...', 'success');
+                        addServiceEntry('Restart kotła');
+                        setTimeout(loadDashboardData, 3000);
+                    } else {
+                        showMessage('Błąd restartu');
+                    }
+                } catch (err) {
+                    showMessage(`Błąd: ${err.message}`);
+                }
+            }
+        }
+
+        function toggleOfflineMode() {
+            appState.offlineMode = !appState.offlineMode;
+            if (appState.offlineMode) {
+                appState.connected = false;
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = 'Tryb offline';
+                showMessage('Tryb offline włączony', 'success');
+            } else {
+                showMessage('Tryb offline wyłączony');
+            }
+            saveState();
+        }
+
+        // Inicjalizacja
+        window.addEventListener('load', () => {
+            loadState();
+        });
+    </script>
+</body>
+</html>
