@@ -1,0 +1,19 @@
+{
+  "appId": "pl.jamper25.serwiskotlow",
+  "appName": "Serwis Kotłów",
+  "webDir": "src",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "App": {
+      "exitOnBackButton": false
+    },
+    "Camera": {
+      "permissions": ["camera", "photos"]
+    }
+  }
+}
