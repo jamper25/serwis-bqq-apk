@@ -1,0 +1,24 @@
+{
+  "name": "serwis-bqq-apk",
+  "version": "2.0.0",
+  "description": "Aplikacja Serwis Kotłów - zarządzanie klientami i usługami",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "http-server src",
+    "build": "echo 'Build for Capacitor'",
+    "cap:add": "capacitor add android",
+    "cap:build": "capacitor build android --release",
+    "cap:sync": "capacitor sync"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/app": "^5.0.0",
+    "@capacitor/camera": "^5.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "author": "jamper25",
+  "license": "MIT"
+}
