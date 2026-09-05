@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serwis BBQ Kees</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Serwis Kotłów - BBQ Kees</h1>
+            <div class="ip-input-group">
+                <input type="text" id="ipInput" placeholder="IP bramki (np. 192.168.4.1)" value="192.168.4.1">
+                <button onclick="connectToGateway()">Połącz</button>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Odłączony</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div id="errorMsg" class="error" style="display:none;"></div>
+            <div id="successMsg" class="success" style="display:none;"><
