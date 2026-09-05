@@ -3,6 +3,7 @@ name: Build BBQ Kees APK
 on:
   push:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,29 +17,21 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
     
-    - name: Set up Node.js 18
+    - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
     
-    - name: Install npm dependencies
+    - name: Install dependencies
       run: npm ci
     
-    - name: Make gradlew executable
+    - name: Create gradlew
       working-directory: ./android
-      run: chmod +x gradlew
-    
-    - name: Build APK
-      working-directory: ./android
-      run: ./gradlew assembleDebug
-      env:
-        ANDROID_SDK_ROOT: ${{ runner.os == 'Windows' && 'C:\Android\sdk' || '/opt/hostedtoolcache/android' }}
+      run: chmod +x gradlew && ./gradlew assembleDebug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-apk
+        name: app-debug.apk
         path: android/app/build/outputs/apk/debug/app-debug.apk
